@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/search/main",
     "pages/read/main",
+    "pages/search/main",
     "pages/index/main"
   ],
   "window": {
@@ -36,7 +36,6 @@
     ]
   },
   "usingComponents": {
-
   },
   "permission": {
     "scope.userLocation": {

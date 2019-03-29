@@ -70,7 +70,8 @@
       },
       toRead(){
         let url='../read/main';
-        wx.navigateTo({url});
+        wx.switchTab({url});
+
       }
     },
 

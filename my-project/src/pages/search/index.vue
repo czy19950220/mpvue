@@ -1,7 +1,10 @@
 <template>
   <!--小说搜索-->
   <div class="book-search">
+    <mp-modal ref="mpModal" :title="title" :content="content" :showCancel="true" confirmText="添加书架" @confirm="confirm" @cancel="cancel"></mp-modal>
     <mp-toast type="error" v-model="showToast" content="没找到"></mp-toast>
+    <mp-toast type="success" v-model="showToast2" content="添加成功"></mp-toast>
+    <mp-toast type="warn" v-model="showToast3" content="已有当前书"></mp-toast>
     <div class="book-search-main">
       <header>
         <div class="weui-cells weui-cells_after-title search-button">
@@ -31,20 +34,27 @@
   import mpButton from 'mpvue-weui/src/button';
   import mpToast from 'mpvue-weui/src/toast';
   import mpBadge from 'mpvue-weui/src/badge';
+  import mpModal from 'mpvue-weui/src/modal';
 
   export default {
     components: {
       mpInput,
       mpButton,
       mpToast,
-      mpBadge
+      mpBadge,
+      mpModal
     },
     name: "search",
     data() {
       return {
-        query: '',
-        searchResult: [],
-        showToast: false
+        query: '',//查询数据
+        searchResult: [],//搜索结果
+        showToast: false,//搜索回调提示
+        title:'小说名',//弹出层标题
+        content:'小说内容',//弹出层内容
+        showToast2:false,//添加书架提示
+        showToast3:false,//添加书架提示2
+        currentBook:'',//当前点击的书
       }
     },
     computed: {},
@@ -76,15 +86,69 @@
               bookList.map((item) => {
                 //图片比例140:200
                 item.cover = item.cover ? that.url2Real(item.cover) : '../assets/imgs/err.png';
+                item.shortIntro2 = item.shortIntro;
                 item.shortIntro = item.shortIntro.length > 30 ? item.shortIntro.substr(0, 30) + "....." : item.shortIntro;
               });
-              //console.log(bookList)
               that.searchResult = bookList;
             }
           }
         })
       },
+      //打开书籍详情
       toBook(result) {
+        let that=this;
+        function step1() {
+          return new Promise(function (resolve, reject) {
+            that.currentBook=result;
+            that.title=result.title;
+            that.content=result.shortIntro2;
+            resolve();
+          })
+        };
+        function step2() {
+          return new Promise(function (resolve, reject) {
+            //console.log(that.title)
+            //console.log(that.content)
+            that.$refs.mpModal.show().then();
+            resolve();
+          })
+        };
+        step1().then(step2);
+      },
+      //点击确定时回调
+      confirm(){
+        let that=this,czyBooks;
+        try {
+          wx.getStorage({
+            key: 'myBooks',
+            success(res) {
+              //类型string转object
+              let data = JSON.parse(res.data);
+              let num=0,len=data.books.length;
+              //看看本地存储是否有当前书
+              for (let i=0;i<len;i++){
+                if (data.books[i]._id==that.currentBook._id) {
+                  num++;
+                }
+              }
+              if (num==0){//书架没有当前书就添加
+                data.books.push(that.currentBook);
+                wx.setStorage({
+                  key: 'myBooks',
+                  data: JSON.stringify(data)
+                })
+                that.showToast2=true;
+              } else {//书架有当前书就不再添加了
+                that.showToast3=true;
+              }
+            }
+          })
+        } catch (e) {
+          console.log(e)
+        }
+      },
+      //点击取消时回调
+      cancel(){
 
       }
     },
@@ -157,43 +221,22 @@
     color: #666;
   }
 
-  .mui-icon {
-    font-size: 16px;
-    color: #fb3535;
-  }
-
-  .mint-badge.is-primary {
-    color: darkcyan;
-    height: 20px;
-    line-height: 16px;
-    background-color: #efeff4;
-    border: 1px solid #666;
-    float: right;
-  }
-
   .book-result-img {
     height: 100%;
     width: 68px;
     float: left;
   }
 
-  .placeholder-class-test {
-    padding-left: 10px;
-  }
-
-  .page__bd_spacing {
-    padding: 0 0 30px;
-  }
-
   .weui-cells {
     padding: 0 20px;
   }
 
-  .autoBtnClass {
-    margin: 15px;
-  }
 
   .search-button {
     margin-bottom: 10px;
+  }
+
+  .modal{
+    text-align: left;
   }
 </style>
