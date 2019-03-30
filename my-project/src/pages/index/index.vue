@@ -68,10 +68,9 @@
           }
         })
       },
-      toRead(){
+      toRead(){//去阅读书架
         let url='../read/main';
         wx.switchTab({url});
-
       }
     },
 

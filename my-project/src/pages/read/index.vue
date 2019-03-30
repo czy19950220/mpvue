@@ -1,7 +1,7 @@
 <template>
   <div class="novel-bookshelf">
     <div class="novel-bookshelf-main">
-      <div class="booksList" v-for="(book,value,index) in booksList" @click="toBookDetail(book._id)" :key="index">
+      <div class="booksList" v-for="(book,value,index) in booksList" @click="toBook(book._id)" :key="index">
         <img :src="book.cover" alt="" class="page-lazyload-image">
         <div class="book-title">{{book.title}}</div>
         <div class="book-lastChapter">阅读至： {{book.lastReadChapter}}</div>
@@ -26,12 +26,14 @@
     },
     computed: {},
     methods: {
-      toBookDetail(id) {//去小说详情页面
-
+      toBook(id) {//去小说阅读页面,通过路由传递参数id
+        //console.log(id);
+        let url = `../book/main?id=${id}`;
+        wx.reLaunch({url});
       },
-      toSearch() {
+      toSearch() {//去搜索书籍
         let url = '../search/main';
-        wx.switchTab({url});
+        wx.reLaunch({url});
       },
       getStorage() {
         let that = this;
@@ -76,7 +78,7 @@
                 //类型string转object
                 let myBooks = JSON.parse(res.data);
                 that.myBooks = myBooks;
-                console.log(that.myBooks)
+                //console.log(that.myBooks)
                 resolve();
               }
             });
@@ -85,7 +87,7 @@
 
         function step2() {
           return new Promise(function (resolve, reject) {
-            console.log(that.myBooks)
+            //console.log(that.myBooks)
             let books = that.myBooks.books;
             let loading = 0;
             for (let i = 0; i < that.myBooks.books.length; i++) {
@@ -127,12 +129,10 @@
   .novel-bookshelf {
     height: 100%;
     width: 100%;
-    background-color: #f8f8f8;
   }
 
   .novel-bookshelf-main {
-    height: 100%;
-    width: 100%;
+    background-color: #f8f8f8;
   }
 
   /*存储*/

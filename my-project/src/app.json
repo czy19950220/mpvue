@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/read/main",
+    "pages/book/main",
     "pages/search/main",
     "pages/index/main"
   ],
@@ -9,31 +10,6 @@
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "陈振宇的小程序",
     "navigationBarTextStyle": "black"
-  },
-  "tabBar": {
-    "color": "#000000",
-    "selectedColor": "#ff6600",
-    "backgroundColor": "#fff",
-    "list": [
-      {
-        "iconPath": "static/images/home1.png",
-        "selectedIconPath": "static/images/home2.png",
-        "pagePath": "pages/index/main",
-        "text": "入口"
-      },
-      {
-        "iconPath": "static/images/news1.png",
-        "selectedIconPath": "static/images/news2.png",
-        "pagePath": "pages/search/main",
-        "text": "搜书"
-      },
-      {
-        "iconPath": "static/images/user1.png",
-        "selectedIconPath": "static/images/user2.png",
-        "pagePath": "pages/read/main",
-        "text": "读书"
-      }
-    ]
   },
   "usingComponents": {
   },

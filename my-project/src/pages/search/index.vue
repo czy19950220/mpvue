@@ -10,7 +10,10 @@
         <div class="weui-cells weui-cells_after-title search-button">
           <mp-input :placeholder="query==''?'请输入搜索内容':''" v-model="query"></mp-input>
         </div>
-        <mp-button type="default" size="large" @click="getSearch()" btnClass="mb15">搜索</mp-button>
+        <div class="buttons">
+          <div class="my-button"><mp-button type="default" size="large" btnClass="mb15" @click="toShelf()">书架</mp-button></div>
+          <div class="my-button"><mp-button type="primary" size="large" @click="getSearch()" btnClass="mb15">搜索</mp-button></div>
+        </div>
       </header>
       <div class="search-book-result">
         <div class="result-detail" v-for="(result,value,index) in searchResult" @click="toBook(result)" :key="index">
@@ -150,6 +153,11 @@
       //点击取消时回调
       cancel(){
 
+      },
+      //去书架
+      toShelf(){
+        let url = '../read/main';
+        wx.reLaunch({url});
       }
     },
     mounted() {
@@ -231,12 +239,18 @@
     padding: 0 20px;
   }
 
-
   .search-button {
     margin-bottom: 10px;
   }
 
-  .modal{
-    text-align: left;
+  .buttons{
+    width: 90%;
+    margin-left: 5%;
+  }
+  .buttons .my-button{
+    width: calc(50% - 20px);
+    float: left;
+    text-align: center;
+    padding: 0px 10px;
   }
 </style>
