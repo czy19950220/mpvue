@@ -31,7 +31,7 @@
       },
       toSearch() {
         let url = '../search/main';
-        wx.navigateTo({url});
+        wx.switchTab({url});
       },
       getStorage() {
         let that = this;
