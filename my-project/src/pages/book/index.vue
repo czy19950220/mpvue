@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="read-main">
-
+        <view class="precon" v-for="(text,index) in bodyText" v-text="text" :key="index"></view>
       </div>
     </scroll-view>
   </div>
@@ -22,11 +22,13 @@
 <script>
   import mpButton from 'mpvue-weui/src/button';
   import MpProgress from 'mp-weui/packages/progress'
+  import swiperTwo from '../../components/swiperTwo'
 
   export default {
     components: {
       mpButton,
-      MpProgress
+      MpProgress,
+      swiperTwo
     },
     name: "index",
     data() {
@@ -39,7 +41,8 @@
         chapterTitle: 'loading.......',//章节名
         sourceId:'',//小说源
         chapterList:[],//章节列表
-        page:0,
+        page:0,//阅读至第几章
+        bodyText:''//小说内容
       }
     },
     methods: {
@@ -152,8 +155,8 @@
                   for(var i=0;i<arr.length;i++){
                     newText.push(arr[i])
                   }
-                  //selfVue.bodyText=newText;
-                  console.log(newText)
+                  selfVue.bodyText=newText;
+                  //console.log(newText)
                 }
               }
             }
@@ -186,14 +189,13 @@
   }
 
   .book-read {
-    height: 3000px;
     background-color: wheat;
   }
 
   .read-main {
     height: 100%;
-    width: calc(100% - 20px);
-    margin: auto;
+    width: calc(100% - 0px);
+    clear: both;
   }
 
   .read-header {
@@ -228,6 +230,17 @@
     margin: auto;
     float: left;
     text-indent: -25px;
+  }
+
+  .precon{
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
+    text-indent: 2em;
+    margin-bottom: 0px;
+    float: left;
+    padding: 0rpx 0.5em;
   }
 
 </style>
