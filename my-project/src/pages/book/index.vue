@@ -1,19 +1,21 @@
 <template>
   <div class="book-content" @click="tapBook">
+    <!--头部，返回，章节显示，设置-->
+    <div v-show="showHeader" class="read-header">
+      <span class="back" @click="toShelf()">{{back}}</span>
+      <div class="name-chapter">
+        <span class="book-name">{{chapterTitle}}</span>
+      </div>
+    </div>
+    <span v-show="showHeader" class="loadpre load-left" @click="loadPrev(-1)">{{back}}</span>
+    <span v-show="showHeader" class="loadpre load-right" @click="loadPrev(1)">&gt;</span>
     <scroll-view class="book-read" scroll-y>
       <!--进度条-->
       <div class="progress">
         <mp-progress id="progress" :percent="percent" :animate="true"/>
       </div>
-      <!--头部，返回，章节显示，设置-->
-      <div v-show="showHeader" class="read-header">
-        <span class="back" @click="toShelf()">{{back}}</span>
-        <div class="name-chapter">
-          <span class="book-name">{{chapterTitle}}</span>
-        </div>
-      </div>
       <div class="read-main">
-        <view class="precon" v-for="(text,index) in bodyText" v-text="text" :key="index"></view>
+        <view class="precon" v-for="(text,index) in bodyText" v-html="text" :key="index"></view>
       </div>
     </scroll-view>
   </div>
@@ -33,7 +35,7 @@
     name: "index",
     data() {
       return {
-        showHeader:true,
+        showHeader:true,//头部，上/下一章
         percent: 100,//进度条进度 %
         back: '＜',//返回按钮
         bookId: '',//获取读书的id
@@ -42,10 +44,17 @@
         sourceId:'',//小说源
         chapterList:[],//章节列表
         page:0,//阅读至第几章
-        bodyText:''//小说内容
+        bodyText:'',//小说内容
+        loading:false,//加载中？
       }
     },
     methods: {
+      goTop() {
+        wx.pageScrollTo({
+          scrollTop: 0,
+          duration: 30
+        })
+      },
       //点击中间区域显示/隐藏头部
       tapBook(e){
         let w = wx.getSystemInfoSync().windowWidth;   // 获取当前窗口的宽度
@@ -66,7 +75,7 @@
       getNovel(id){
         let that=this;
         let url=`http://api.zhuishushenqi.com/toc?view=summary&book=${id}`;
-        console.log(url)
+        //console.log(url)
         return new Promise( (resolve, reject) => {
           wx.request({
             url: url,
@@ -84,7 +93,7 @@
                   }
                 }
                 that.sourceId=sourceId;
-                console.log(sourceId);
+                //console.log(sourceId);
                 resolve();
               }
             }
@@ -95,7 +104,7 @@
       getLink() {
         return new Promise((resolve, reject)=>{
           let url = `http://api.zhuishushenqi.com/toc/${this.sourceId}?view=chapters`;
-          console.log(url);
+          //console.log(url);
           let that=this;
           wx.request({
             url: url,
@@ -103,7 +112,7 @@
               'content-type': 'application/json' // 默认值
             },
             success(res) {
-              console.log(res)
+              //console.log(res)
               if (res.status == 200 || res.statusCode==200) {
                 let chapterList = res.data;
                 //console.log(chapterList)
@@ -128,7 +137,7 @@
               'content-type': 'application/json' // 默认值
             },
             success(res) {
-              console.log(res)
+              //console.log(res)
               if (res.status == 200 || res.statusCode==200) {
                 let data = res.data;
                 if (data.ok) {
@@ -162,16 +171,58 @@
             }
           })
         });
-      }
+      },
+      //上/下一章
+      loadPrev(num){
+        this.goTop();
+        //this.openFullScreen();
+        console.log('loadPrev');
+        this.page =this.page+num;
+        if (this.page<0){
+          this.page =0;
+          wx.showToast({
+            title: '已经是第一章了',
+            icon: 'success',
+            duration: 800,
+            mask: true
+          });
+        }else if (this.page>=this.chapterList.length){
+          this.page =this.chapterList.length-1;
+          wx.showToast({
+            title: '已经是最新章了',
+            icon: 'success',
+            duration: 800,
+            mask: true
+          });
+        }else {
+          this.getText();
+          this.chapterTitle=this.chapterList[this.page].title;
+        }
+      },
     },
     create() {
       //this.getNovel(this.bookId);
+    },
+    onReachBottom(){
+     this.showHeader = true;
     },
     onLoad: function (options) {
       //console.log(options.id)
       this.bookId = options.id;
       this.getNovel(this.bookId).then(this.getLink).then(this.getText);
     },
+    onLaunch: function () {
+      this.getHeight(1)
+    },
+    getHeight: function (n) {
+      var _this = this;
+      wx.getSystemInfo({
+        success: function (res) {
+          _this.data.minscreenHeight = res.windowHeight * n
+        }
+      })
+    },
+
   }
 </script>
 
@@ -190,6 +241,8 @@
 
   .book-read {
     background-color: wheat;
+    min-height: 100%;
+    padding-top: 42px;
   }
 
   .read-main {
@@ -240,7 +293,26 @@
     text-indent: 2em;
     margin-bottom: 0px;
     float: left;
-    padding: 0rpx 0.5em;
+    padding: 0px 0.5em;
   }
 
+  .loadpre{
+    position: fixed;
+    color: white;
+    background-color: black;
+    opacity: 0.4;
+    top: 50%;
+    text-align: center;
+    font-size: 30px;
+    height: 50px;
+    width: 36px;
+    line-height: 50px;
+    z-index: 1000;
+  }
+  .load-right{
+    right: 0px;
+  }
+  .load-left{
+    left: 0px;
+  }
 </style>
