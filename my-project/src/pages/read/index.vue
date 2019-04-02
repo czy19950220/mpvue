@@ -1,7 +1,7 @@
 <template>
   <div class="novel-bookshelf">
     <div class="novel-bookshelf-main">
-      <div class="booksList" v-for="(book,value,index) in booksList" @click="toBook(book._id)" :key="index">
+      <div class="booksList" v-for="(book,value,index) in booksList" @click="toBook(book._id,book.lastReadChapterIndex)" :key="index">
         <img :src="book.cover" alt="" class="page-lazyload-image">
         <div class="book-title">{{book.title}}</div>
         <div class="book-lastChapter">阅读至： {{book.lastReadChapter}}</div>
@@ -26,9 +26,13 @@
     },
     computed: {},
     methods: {
-      toBook(id) {//去小说阅读页面,通过路由传递参数id
-        //console.log(id);
-        let url = `../book/main?id=${id}`;
+      toBook(id,page) {//去小说阅读页面,通过路由传递参数id
+        let url;
+        if (page ==undefined){
+          url = `../book/main?id=${id}&page=0`;
+        } else {
+          url = `../book/main?id=${id}&page=${page}`;
+        }
         wx.reLaunch({url});
       },
       toSearch() {//去搜索书籍
@@ -169,7 +173,7 @@
     text-align: left;
     padding-left: 20px;
     color: #216412;
-    line-height: 1rem;
+    line-height: 1.5;
   }
 
   .book-newChapter {

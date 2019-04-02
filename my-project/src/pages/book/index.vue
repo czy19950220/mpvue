@@ -1,5 +1,7 @@
 <template>
   <div class="book-content" @click="tapBook">
+    <!--加载动画-->
+    <mp-loading :showLoading="isShowLoading" loadingText="加载中..." mask="true"></mp-loading>
     <!--头部，返回，章节显示，设置-->
     <div v-show="showHeader" class="read-header">
       <span class="back" @click="toShelf()">{{back}}</span>
@@ -7,15 +9,22 @@
         <span class="book-name">{{chapterTitle}}</span>
       </div>
     </div>
+    <!--上一章/下一章/目录-->
     <span v-show="showHeader" class="loadpre load-left" @click="loadPrev(-1)">{{back}}</span>
     <span v-show="showHeader" class="loadpre load-right" @click="loadPrev(1)">&gt;</span>
+    <div class="mulu" v-show="showHeader">
+      <div class="mulu-con"><mp-button @click="loadPrev(-1)" type="primary" size="normal" btnClass="mb15 mr15">上一章</mp-button></div>
+      <div class="mulu-con mr"><mp-button type="primary" size="large" btnClass="mb15 mr15">目录</mp-button></div>
+      <div class="mulu-con"><mp-button @click="loadPrev(1)" type="primary" size="normal" btnClass="mb15 mr15">下一章</mp-button></div>
+    </div>
+    <!--小说内容-->
     <scroll-view class="book-read" scroll-y>
       <!--进度条-->
       <div class="progress">
-        <mp-progress id="progress" :percent="percent" :animate="true"/>
+        <mp-progress id="progress" :animateMode="animateMode" :percent="percent" :animate="true"/>
       </div>
       <div class="read-main">
-        <view class="precon" v-for="(text,index) in bodyText" v-html="text" :key="index"></view>
+        <view :style="fontSize" class="precon" v-for="(text,index) in bodyText" v-html="text" :key="index"></view>
       </div>
     </scroll-view>
   </div>
@@ -24,17 +33,18 @@
 <script>
   import mpButton from 'mpvue-weui/src/button';
   import MpProgress from 'mp-weui/packages/progress'
-  import swiperTwo from '../../components/swiperTwo'
+  import mpLoading from 'mpvue-weui/src/loading';
 
   export default {
     components: {
       mpButton,
       MpProgress,
-      swiperTwo
+      mpLoading
     },
     name: "index",
     data() {
       return {
+        isShowLoading:false,//加载
         showHeader:true,//头部，上/下一章
         percent: 100,//进度条进度 %
         back: '＜',//返回按钮
@@ -46,6 +56,9 @@
         page:0,//阅读至第几章
         bodyText:'',//小说内容
         loading:false,//加载中？
+        myBooks:[],//书籍存储进度
+        fontSize:`font-size:28px;`,//字体大小
+        animateMode:'forwards'//进度条播放模式
       }
     },
     methods: {
@@ -62,14 +75,14 @@
         let x=e.clientX||e.x;
         let y=e.clientY||e.y;
         if(x/w>0.35 && x/w<0.65 && y/h>0.30 && y/h<0.70) {
-          console.log(1);
+          console.log('隐藏/显示');
           this.showHeader=!this.showHeader;
         }
       },
       //返回书架
       toShelf() {
         let url = '../read/main';
-        wx.reLaunch({url});
+        wx.redirectTo({url});
       },
       //获取小说源
       getNovel(id){
@@ -128,6 +141,9 @@
       //获取章节的文本
       getText() {//http://chapter2.zhuishushenqi.com
         let selfVue=this;
+        selfVue.percent=10;//进度条
+        selfVue.animateMode='forwards';//进度条
+        selfVue.isShowLoading=true;//加载动画on
         return new Promise((resolve, reject)=>{
           let chapters=selfVue.chapterList;
           let url=`http://chapter2.zhuishushenqi.com/chapter/${encodeURIComponent(chapters[selfVue.page].link)}?k=2124b73d7e2e1945&t=1468223717`;
@@ -157,6 +173,7 @@
                     });
                     return;
                   }
+                  selfVue.percent=30;
                   //把回车换成br标签
                   selfVue.bodyText = data.chapter.body.split("\n").join("<br>");//.split("\n").join("<br>")
                   var arr = selfVue.bodyText.split('<br>');
@@ -164,7 +181,11 @@
                   for(var i=0;i<arr.length;i++){
                     newText.push(arr[i])
                   }
+                  selfVue.percent=80;
                   selfVue.bodyText=newText;
+                  selfVue.percent=100;
+                  selfVue.isShowLoading=false;//加载动画off
+                  selfVue.changeBookshelf()
                   //console.log(newText)
                 }
               }
@@ -175,8 +196,9 @@
       //上/下一章
       loadPrev(num){
         this.goTop();
+        this.animateMode='backwards';//进度条
         //this.openFullScreen();
-        console.log('loadPrev');
+        //console.log('loadPrev');
         this.page =this.page+num;
         if (this.page<0){
           this.page =0;
@@ -199,6 +221,28 @@
           this.chapterTitle=this.chapterList[this.page].title;
         }
       },
+      //存储阅读到第几章了
+      changeBookshelf(){
+        let that=this,ID=this.bookId;
+        wx.getStorage({
+          key: 'myBooks',
+          success(res) {
+            //类型string转object
+            let data = JSON.parse(res.data);
+            let len = data.books.length;
+            data.books.map((ele)=>{
+              if(ele._id == ID){
+                ele.lastReadChapter= that.chapterList[that.page].title;//标题
+                ele.lastReadChapterIndex= that.page;//标题索引
+                wx.setStorage({//存储
+                  key: 'myBooks',
+                  data: JSON.stringify(data)
+                })
+              }
+            })
+          }
+        });
+      }
     },
     create() {
       //this.getNovel(this.bookId);
@@ -207,8 +251,8 @@
      this.showHeader = true;
     },
     onLoad: function (options) {
-      //console.log(options.id)
       this.bookId = options.id;
+      this.page=parseInt(options.page);
       this.getNovel(this.bookId).then(this.getLink).then(this.getText);
     },
     onLaunch: function () {
@@ -309,10 +353,28 @@
     line-height: 50px;
     z-index: 1000;
   }
+
   .load-right{
     right: 0px;
   }
+
   .load-left{
     left: 0px;
   }
+
+  .mulu{
+    z-index: 10000;
+    position: fixed;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    text-align: center;
+  }
+
+  .mulu-con{
+    display: inline-block;
+    width: 33.3%;
+  }
+
 </style>
