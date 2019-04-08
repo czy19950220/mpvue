@@ -8,7 +8,9 @@ Vue.use(Vuex);
 
 const state = {
   isAuthenicated: false,
-  user: null
+  user: null,
+  chapters:[],//章节
+  sourceId:''//小说id
 };
 export default new Vuex.Store({
   state,

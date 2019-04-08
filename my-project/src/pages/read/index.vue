@@ -1,7 +1,15 @@
 <template>
   <div class="novel-bookshelf">
+    <mp-modal ref="mpModal"
+              title="删除"
+              :content="content"
+              :showCancel="true"
+              @confirm="confirm"
+              @cancel="cancel">
+    </mp-modal>
     <div class="novel-bookshelf-main">
-      <div class="booksList" v-for="(book,value,index) in booksList" @click="toBook(book._id,book.lastReadChapterIndex)" :key="index">
+      <div class="booksList" @longtap="longTap(book.title)" v-for="(book,value,index) in booksList"
+           @tap="toBook(book._id,book.lastReadChapterIndex)" :key="index">
         <img :src="book.cover" alt="" class="page-lazyload-image">
         <div class="book-title">{{book.title}}</div>
         <div class="book-lastChapter">阅读至： {{book.lastReadChapter}}</div>
@@ -15,30 +23,78 @@
 </template>
 
 <script>
-  let query = 'query';
+  import mpModal from 'mpvue-weui/src/modal';
+
   export default {
+    components: {
+      mpModal,
+    },
     name: "index",
     data() {
       return {
-        booksList: [],
-        myBooks: [],
+        booksList: [],//当前获取的列表
+        myBooks: [],//本地存储的列表
+        lockTap: false,//长按和短按的判定
+        content: "",//删除显示内容=title
       }
     },
     computed: {},
     methods: {
-      toBook(id,page) {//去小说阅读页面,通过路由传递参数id
-        let url;
-        if (page ==undefined){
-          url = `../book/main?id=${id}&page=0`;
-        } else {
-          url = `../book/main?id=${id}&page=${page}`;
-        }
-        wx.reLaunch({url});
+      //点击取消时回调
+      cancel() {
+        wx.showToast({
+          title: '已取消',
+          icon: 'success',
+          duration: 500,
+          mask: true
+        });
       },
+      //点击确定时回调
+      confirm() {
+        let len = this.booksList.length, that = this, index = 0;
+        //获取当前删除选项索引
+        for (let i = 0; i < len; i++) {
+          if (that.booksList[i].title == this.content) {
+            index = i;
+          }
+        }
+        //删除当前选项
+        this.booksList.splice(index, 1);
+        this.myBooks.books = this.booksList;
+        //存储
+        wx.setStorage({
+          key: 'myBooks',
+          data: JSON.stringify(that.myBooks)
+        });
+        //提示
+        wx.showToast({
+          title: '已删除',
+          icon: 'success',
+          duration: 500,
+          mask: true
+        });
+      },
+      //去阅读
+      toBook(id, page) {//去小说阅读页面,通过路由传递参数id
+        if (!this.lockTap) {
+          let url;
+          if (page == undefined) {
+            url = `../book/main?id=${id}&page=0`;
+          } else {
+            url = `../book/main?id=${id}&page=${page}`;
+          }
+          wx.reLaunch({url});
+        } else {
+          this.lockTap = false;
+        }
+
+      },
+      //去搜索
       toSearch() {//去搜索书籍
         let url = '../search/main';
         wx.reLaunch({url});
       },
+      //获取本地存储
       getStorage() {
         let that = this;
         try {
@@ -51,7 +107,7 @@
                 //类型string转object
                 let data = JSON.parse(res.data);
                 that.booksList = data.books;
-                //console.log(that.booksList)
+                console.log(that.booksList)
               }
             })
           } else {
@@ -71,6 +127,7 @@
           // Do something when catch error
         }
       },
+      //获取书详情
       getBooks() {
         let that = this;
 
@@ -104,7 +161,7 @@
                 success(res) {
                   loading++;
                   books[i].newChapter2 = res.data.lastChapter;
-                  books[i].lastReadChapter = books[i].lastReadChapter||'还没阅读';
+                  books[i].lastReadChapter = books[i].lastReadChapter || '还没阅读';
                   if (loading == that.myBooks.books.length) {
                     that.booksList = books;
                   }
@@ -115,13 +172,30 @@
           });
           //console.log(books)
         }
+
         step1().then(step2);
+      },
+      //长按删除
+      longTap(title) {
+        this.lockTap = true;//长按上锁
+        let that = this;
+
+        function F1() {
+          return new Promise((resolve, reject) => {
+            that.content = title;
+            resolve();
+          })
+        }
+
+        function F2() {
+          that.$refs.mpModal.show();//打开删除弹框
+        }
+
+        F1().then(F2)
       }
     },
     mounted() {
       this.getBooks();
-      //this.booksList=books;
-      //console.log(this.booksList)
     },
     created() {
       this.getStorage();

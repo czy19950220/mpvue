@@ -14,17 +14,17 @@
     <span v-show="showHeader" class="loadpre load-right" @click="loadPrev(1)">&gt;</span>
     <div class="mulu" v-show="showHeader">
       <div class="mulu-con"><mp-button @click="loadPrev(-1)" type="primary" size="normal" btnClass="mb15 mr15">上一章</mp-button></div>
-      <div class="mulu-con mr"><mp-button type="primary" size="large" btnClass="mb15 mr15">目录</mp-button></div>
+      <div class="mulu-con mr"><mp-button type="primary" size="large" btnClass="mb15 mr15" @click="toChapters()">目录</mp-button></div>
       <div class="mulu-con"><mp-button @click="loadPrev(1)" type="primary" size="normal" btnClass="mb15 mr15">下一章</mp-button></div>
     </div>
     <!--小说内容-->
     <scroll-view class="book-read" scroll-y>
       <!--进度条-->
-      <div class="progress">
+      <!--<div class="progress">
         <mp-progress id="progress" :animateMode="animateMode" :percent="percent" :animate="true"/>
-      </div>
+      </div>-->
       <div class="read-main">
-        <view :style="fontSize" class="precon" v-for="(text,index) in bodyText" v-html="text" :key="index"></view>
+        <p :style="fontSize" class="precon" v-for="(text,index) in bodyText" v-html="text" :key="index"></p>
       </div>
     </scroll-view>
   </div>
@@ -34,8 +34,14 @@
   import mpButton from 'mpvue-weui/src/button';
   import MpProgress from 'mp-weui/packages/progress'
   import mpLoading from 'mpvue-weui/src/loading';
+  import {mapGetters, mapActions} from 'vuex'
 
   export default {
+    computed: {
+      ...mapGetters([
+        'sourceId'
+      ])
+    },
     components: {
       mpButton,
       MpProgress,
@@ -62,6 +68,16 @@
       }
     },
     methods: {
+      ...mapActions([
+        'setSourceId'
+      ]),
+      //目录
+      toChapters(){
+        //把小说源的id传过去
+        this.setSourceId(this.sourceId)
+        let url = '../chapters/main?id='+this.bookId+`&page=${this.page}`;
+        wx.navigateTo({url});
+      },
       goTop() {
         wx.pageScrollTo({
           scrollTop: 0,
@@ -143,7 +159,6 @@
         let selfVue=this;
         selfVue.percent=10;//进度条
         selfVue.animateMode='forwards';//进度条
-        selfVue.isShowLoading=true;//加载动画on
         return new Promise((resolve, reject)=>{
           let chapters=selfVue.chapterList;
           let url=`http://chapter2.zhuishushenqi.com/chapter/${encodeURIComponent(chapters[selfVue.page].link)}?k=2124b73d7e2e1945&t=1468223717`;
@@ -217,6 +232,7 @@
             mask: true
           });
         }else {
+          this.isShowLoading=true;//加载动画on
           this.getText();
           this.chapterTitle=this.chapterList[this.page].title;
         }
@@ -251,6 +267,7 @@
      this.showHeader = true;
     },
     onLoad: function (options) {
+      this.isShowLoading=true;//加载动画on
       this.bookId = options.id;
       this.page=parseInt(options.page);
       this.getNovel(this.bookId).then(this.getLink).then(this.getText);
@@ -331,13 +348,14 @@
 
   .precon{
     line-height: 1.5;
+    display: inline-block;
     white-space: pre-wrap;
     word-wrap: break-word;
-    text-align: left;
+    text-align: justify;
     text-indent: 2em;
     margin-bottom: 0px;
     float: left;
-    padding: 0px 0.5em;
+    padding: 0px 10px;
   }
 
   .loadpre{

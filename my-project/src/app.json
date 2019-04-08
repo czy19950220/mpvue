@@ -3,7 +3,9 @@
     "pages/read/main",
     "pages/book/main",
     "pages/search/main",
-    "pages/index/main"
+    "pages/index/main",
+    "pages/chapters/main"
+
   ],
   "window": {
     "backgroundTextStyle": "light",
