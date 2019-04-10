@@ -13,6 +13,7 @@
         <div class="buttons">
           <div class="my-button"><mp-button type="default" size="large" btnClass="mb15" @click="toShelf()">书架</mp-button></div>
           <div class="my-button"><mp-button type="primary" size="large" @click="getSearch()" btnClass="mb15">搜索</mp-button></div>
+          <div class="my-button"><mp-button type="primary" size="large" @click="toIndex()" btnClass="mb15">首页</mp-button></div>
         </div>
       </header>
       <div class="search-book-result">
@@ -62,6 +63,11 @@
     },
     computed: {},
     methods: {
+      //首页
+      toIndex(){
+        let url = '../index/main';
+        wx.navigateTo({url});
+      },
       //转化封面url为实际url
       url2Real(url) {
         if (url.search(/agent/i) === -1) {

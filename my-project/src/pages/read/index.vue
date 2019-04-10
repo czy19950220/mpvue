@@ -1,4 +1,5 @@
 <template>
+  <!--书架-->
   <div class="novel-bookshelf">
     <mp-modal ref="mpModal"
               title="删除"

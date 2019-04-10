@@ -1,4 +1,5 @@
 <template>
+  <!--阅读-->
   <div class="book-content" @click="tapBook">
     <!--加载动画-->
     <mp-loading :showLoading="isShowLoading" loadingText="加载中..." mask="true"></mp-loading>

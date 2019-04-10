@@ -1,4 +1,5 @@
 <template>
+  <!--首页-->
   <div class="container">
     <div class="login">
       <img :src="userImg" class="user" alt="用户头像">
@@ -7,6 +8,7 @@
         <button open-type="getUserInfo" @getuserinfo="getUserInfo">获取信息</button>
       </div>
       <button @click="toRead()" class="read">阅读</button>
+      <web-view src="https://lirongyao.com/api/index.php"></web-view>
     </div>
   </div>
 </template>
