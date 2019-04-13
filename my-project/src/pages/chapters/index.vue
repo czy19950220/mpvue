@@ -48,9 +48,10 @@
       getLink(id) {
         return new Promise((resolve, reject) => {
           let url = `http://api.zhuishushenqi.com/toc/${id}?view=chapters`;
+          let url2 = `${this.$JsonBird}http://api.zhuishushenqi.com/toc/${id}?view=chapters`;
           let that = this;
           wx.request({
-            url: url,
+            url: url2,
             header: {
               'content-type': 'application/json' // 默认值
             },

@@ -105,10 +105,11 @@
       getNovel(id){
         let that=this;
         let url=`http://api.zhuishushenqi.com/toc?view=summary&book=${id}`;
+        let url2=`${this.$JsonBird}http://api.zhuishushenqi.com/toc?view=summary&book=${id}`;
         //console.log(url)
         return new Promise( (resolve, reject) => {
           wx.request({
-            url: url,
+            url: url2,
             header: {
               'content-type': 'application/json' // 默认值
             },
@@ -134,10 +135,11 @@
       getLink() {
         return new Promise((resolve, reject)=>{
           let url = `http://api.zhuishushenqi.com/toc/${this.sourceId}?view=chapters`;
+          let url2 = `${this.$JsonBird}http://api.zhuishushenqi.com/toc/${this.sourceId}?view=chapters`;
           //console.log(url);
           let that=this;
           wx.request({
-            url: url,
+            url: url2,
             header: {
               'content-type': 'application/json' // 默认值
             },
@@ -163,8 +165,9 @@
         return new Promise((resolve, reject)=>{
           let chapters=selfVue.chapterList;
           let url=`http://chapter2.zhuishushenqi.com/chapter/${encodeURIComponent(chapters[selfVue.page].link)}?k=2124b73d7e2e1945&t=1468223717`;
+          let url2=`${this.$JsonBird}http://chapter2.zhuishushenqi.com/chapter/${encodeURIComponent(chapters[selfVue.page].link)}?k=2124b73d7e2e1945&t=1468223717`;
           wx.request({
-            url: url,
+            url: url2,
             header: {
               'content-type': 'application/json' // 默认值
             },

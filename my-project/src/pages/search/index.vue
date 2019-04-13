@@ -81,8 +81,9 @@
       getSearch() {
         let that = this;
         let url = `http://api.zhuishushenqi.com/book/fuzzy-search?query=${this.query}&start=0&limit=20`;
+        let url2 = `${this.$JsonBird}http://api.zhuishushenqi.com/book/fuzzy-search?query=${this.query}&start=0&limit=20`;
         wx.request({
-          url: url,
+          url: url2,
           header: {
             'content-type': 'application/json' // 默认值
           },

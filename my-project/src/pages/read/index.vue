@@ -154,8 +154,9 @@
             let loading = 0;
             for (let i = 0; i < that.myBooks.books.length; i++) {
               let search = `http://api.zhuishushenqi.com/book/${that.myBooks.books[i]._id}`;
+              let search2 = `${that.$JsonBird}http://api.zhuishushenqi.com/book/${that.myBooks.books[i]._id}`;
               wx.request({
-                url: search,
+                url: search2,
                 header: {
                   'content-type': 'application/json' // 默认值
                 },
