@@ -162,7 +162,7 @@
         let selfVue=this;
         selfVue.percent=10;//进度条
         selfVue.animateMode='forwards';//进度条
-        return new Promise((resolve, reject)=>{
+
           let chapters=selfVue.chapterList;
           let url=`http://chapter2.zhuishushenqi.com/chapter/${encodeURIComponent(chapters[selfVue.page].link)}?k=2124b73d7e2e1945&t=1468223717`;
           let url2=`${this.$JsonBird}http://chapter2.zhuishushenqi.com/chapter/${encodeURIComponent(chapters[selfVue.page].link)}?k=2124b73d7e2e1945&t=1468223717`;
@@ -209,8 +209,7 @@
                 }
               }
             }
-          })
-        });
+          });
       },
       //上/下一章
       loadPrev(num){

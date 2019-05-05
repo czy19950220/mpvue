@@ -198,6 +198,16 @@
     },
     mounted() {
       this.getBooks();
+      wx.onNetworkStatusChange(function (res) {
+        console.log(res.isConnected);
+        console.log(res.networkType)
+      })
+      wx.getNetworkType({
+        success(res) {
+          const networkType = res.networkType
+          console.log(networkType)
+        }
+      })
     },
     created() {
       this.getStorage();

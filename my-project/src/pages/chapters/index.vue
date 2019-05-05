@@ -43,6 +43,9 @@
         'sourceId'
       ])
     },
+    watch:{
+
+    },
     methods: {
       //获取连接
       getLink(id) {
@@ -83,25 +86,29 @@
         });
       },
       change2(page) {
-        if (this.chapterList == []) {
+        let that=this;
+        if (this.chapterList == []) {//如果没有数据就重新获取
           setTimeout(() => {
-            this.change2(this.chapterIndex)
+            this.change2(page)
           }, 100)
-        } else {
-          setTimeout(() => {
+        } else {//如果有数据就定位到阅读的章节目录位置
             const query = wx.createSelectorQuery();
             query.select('.chapter').boundingClientRect();
             query.selectViewport().scrollOffset();
             query.exec(function (res) {
-              wx.pageScrollTo({
-                scrollTop: res[0].height * page - 50,
-                duration: 30
-              })
+              if(res[0]){//如果dom循环有渲染完成就执行定位
+                wx.pageScrollTo({
+                  scrollTop: res[0].height * page - 50,
+                  duration: 30
+                });
+              }else {//如果dom循环还没有渲染完成就重新执行
+                console.log(11);
+                that.change2(page)
+              }
             });
-          }, 500)
         }
       },
-      changing(e) {
+      changing(e) {//在拖动的时候改变位置
         const query = wx.createSelectorQuery();
         query.select('.chapter').boundingClientRect();
         query.selectViewport().scrollOffset();
